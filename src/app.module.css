@@ -99,3 +99,41 @@
 .contentBox small {
   font-size: 1rem;
 }
+
+@media (max-width: 600px) {
+  body {
+    overflow-x: hidden;
+  }
+  .wrapper {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+  .newText {
+    gap: 0;
+  }
+  .newText input {
+    border-radius: 8px 0 0 8px;
+    border-right: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .newText button {
+    border-radius: 0 8px 8px 0;
+    border-left: none;
+  }
+  .task {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .task button {
+    align-self: flex-end;
+    margin-top: .5rem;
+  }
+  .task label,
+  .task span {
+    font-size: 0.8125rem;
+    line-height: 1.2;
+  }
+}
+
+
