@@ -1,4 +1,4 @@
-import { useState, useMemo, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, useMemo, ChangeEvent, FormEvent } from 'react';
 import { PlusCircle, ClipboardText } from 'phosphor-react';
 import { v4 as uuidv4 } from 'uuid';
 import styles from './app.module.css';
@@ -11,46 +11,58 @@ export interface TaskType {
   isCompleted: boolean;
 }
 
+enum StorageKey {
+  TASKS = 'todo-ts/tasks'
+}
+
 const initialTasks: TaskType[] = [
   { id: uuidv4(), title: 'Tarefa 1', isCompleted: false },
-  { id: uuidv4(), title: 'Tarefa 2', isCompleted: false },
+  { id: uuidv4(), title: 'Tarefa 2', isCompleted: false }
 ];
 
+const loadTasks = (): TaskType[] => {
+  try {
+    const raw = localStorage.getItem(StorageKey.TASKS);
+    return raw ? (JSON.parse(raw) as TaskType[]) : initialTasks;
+  } catch {
+    return initialTasks;
+  }
+};
+
+const saveTasks = (tasks: TaskType[]): void => {
+  localStorage.setItem(StorageKey.TASKS, JSON.stringify(tasks));
+};
+
 export const App = (): JSX.Element => {
-  const [tasks, setTasks] = useState<TaskType[]>(initialTasks);
-  const [newTaskTitle, setNewTaskTitle] = useState<string>('');
+  const [tasks, setTasks] = useState<TaskType[]>(loadTasks);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+
+  useEffect(() => saveTasks(tasks), [tasks]);
 
   const completedCount = useMemo(
     () => tasks.filter(task => task.isCompleted).length,
     [tasks]
   );
 
-  const handleNewTaskTitleChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ): void => {
-    setNewTaskTitle(event.target.value);
-  };
+  const handleNewTaskTitleChange = ({
+    target
+  }: ChangeEvent<HTMLInputElement>): void => setNewTaskTitle(target.value);
 
-  const handleCreateTask = (event: FormEvent<HTMLFormElement>): void => {
-    event.preventDefault();
+  const handleCreateTask = (e: FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
     const title = newTaskTitle.trim();
     if (!title) return;
-
     setTasks(prev => [...prev, { id: uuidv4(), title, isCompleted: false }]);
     setNewTaskTitle('');
   };
 
-  const handleToggleTaskCompletion = (id: string): void => {
+  const handleToggleTaskCompletion = (id: string): void =>
     setTasks(prev =>
-      prev.map(task =>
-        task.id === id ? { ...task, isCompleted: !task.isCompleted } : task
-      )
+      prev.map(task => (task.id === id ? { ...task, isCompleted: !task.isCompleted } : task))
     );
-  };
 
-  const handleDeleteTask = (id: string): void => {
+  const handleDeleteTask = (id: string): void =>
     setTasks(prev => prev.filter(task => task.id !== id));
-  };
 
   return (
     <>
@@ -69,23 +81,21 @@ export const App = (): JSX.Element => {
             <PlusCircle size={20} />
           </button>
         </form>
+
         <div className={styles.content}>
           <div className={styles.contentHeader}>
             <div>
               <strong>Tarefas criadas</strong>
               <span>{tasks.length}</span>
             </div>
-            
             <div>
               <strong>Concluídas</strong>
-              <span>
-                {completedCount} de {tasks.length}
-              </span>
+              <span>{completedCount} de {tasks.length}</span>
             </div>
           </div>
 
           <div className={styles.contentBox}>
-            {tasks.length > 0 ? (
+            {tasks.length ? (
               tasks.map(task => (
                 <Task
                   key={task.id}
