@@ -1,30 +1,44 @@
-import { Trash } from "phosphor-react";
-import styles from "./task.module.css";
+import { Trash } from 'phosphor-react';
+import styles from './task.module.css';
 
-export function Task({ checked, title, id, onComplete, onDelete }: any) {
-  const handleCompleteTask = () => {
-    onComplete(id);
-  };
+export interface TaskProps {
+  id: string;
+  title: string;
+  checked: boolean;
+  onComplete: (id: string) => void;
+  onDelete: (id: string) => void;
+}
 
-  const handleDeleteTask = () => {
-    onDelete(id);
-  };
+export const Task = ({
+  id,
+  title,
+  checked,
+  onComplete,
+  onDelete,
+}: TaskProps): JSX.Element | null => {
+  if (!id) return null;
+
+  const handleToggle = () => onComplete(id);
+  const handleRemove = () => onDelete(id);
 
   return (
     <div className={styles.task}>
-      <div>
+      <label htmlFor={id} className={styles.checkboxWrapper}>
         <input
           type="checkbox"
-          id="task"
-          name="task"
+          id={id}
           checked={checked}
-          onClick={handleCompleteTask}
+          onChange={handleToggle}
         />
-        <label htmlFor="task">{title}</label>
-      </div>
-      <button type="button" onClick={handleDeleteTask}>
+        <span className={checked ? styles.checkedTitle : ''}>{title}</span>
+      </label>
+      <button
+        type="button"
+        aria-label={`Remove task ${title}`}
+        onClick={handleRemove}
+      >
         <Trash size={24} />
       </button>
     </div>
   );
-}
+};
