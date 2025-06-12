@@ -57,7 +57,7 @@
   color: var(--gray-100);
 }
 
-.task input[type="checkbox"]:checked + label {
+.task label input[type="checkbox"]:checked + span {
   text-decoration-line: line-through;
   color: var(--gray-300)
 }
